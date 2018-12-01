@@ -1,10 +1,14 @@
 package servidor;
 
+import modelo.Mensagem;
+import modelo.Pessoa;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 public class Servidor {
 
@@ -28,7 +32,8 @@ public class Servidor {
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
             System.out.println("Tratando...");
-            Mensagem mensagem = objectInputStream.readObject();
+            Mensagem mensagem = (Mensagem) objectInputStream.readObject();
+
             String operacao = mensagem.getOperacao();
 
             if(operacao.equals("HELLO")){
@@ -40,7 +45,9 @@ public class Servidor {
                 resposta.setParam("mensagem", "Hello World", nome, sobrenome);
             }
 
-            objectOutputStream.writeObject(mensagem);
+
+
+            objectOutputStream.writeObject(resposta);
             objectOutputStream.flush();
 
             objectInputStream.close();
