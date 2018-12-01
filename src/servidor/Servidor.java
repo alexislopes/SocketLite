@@ -15,6 +15,7 @@ public class Servidor {
     private ServerSocket serverSocket;
     private Mensagem resposta;
     private Mensagem mensagem;
+    private Status status;
 
     // método que cria o server recebendo uma porta como parâmetro.
     public void criaServer(int porta) throws IOException {
