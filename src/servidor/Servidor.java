@@ -2,6 +2,7 @@ package servidor;
 
 import modelo.Mensagem;
 import modelo.Pessoa;
+import modelo.Status;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,6 +28,9 @@ public class Servidor {
     }
 
     private void trataConexao(Socket socket) throws IOException {
+
+        Mensagem resposta = null;
+
         try {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -36,16 +40,41 @@ public class Servidor {
 
             String operacao = mensagem.getOperacao();
 
-            if(operacao.equals("HELLO")){
+
+            if (operacao.equals("HELLO")) {
                 String nome = (String) mensagem.getParam("nome");
                 String sobrenome = (String) mensagem.getParam("sobrenome");
 
-                Mensagem resposta = new Mensagem("HELLOREPLY");
-                resposta.setStatus("OK");
-                resposta.setParam("mensagem", "Hello World", nome, sobrenome);
+                resposta = new Mensagem("HELLOREPLY");
+
+                if (nome == null || sobrenome == null) {
+                    resposta.setStatus(Status.PARAMERROR);
+                } else {
+                    resposta.setStatus(Status.OK);
+                    resposta.setParam("mensagem", "Hello World" + " " + nome + " " + sobrenome);
+                }
             }
 
+            if (operacao.equals("DIV")) {
 
+                try {
+                    Integer op1 = (Integer) mensagem.getParam("op1");
+                    Integer op2 = (Integer) mensagem.getParam("op2");
+
+                    resposta = new Mensagem("DIVREPLY");
+
+                    if (op2 == 0) {
+                        resposta.setStatus(Status.DIVZERO);
+                    } else {
+                        resposta.setStatus(Status.OK);
+                        float div = op1/op2;
+                        resposta.setParam("res", div);
+                    }
+
+                } catch (Exception e) {
+                    resposta.setStatus(Status.PARAMERROR);
+                }
+            }
 
             objectOutputStream.writeObject(resposta);
             objectOutputStream.flush();

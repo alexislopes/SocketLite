@@ -2,6 +2,7 @@ package cliente;
 
 import modelo.Mensagem;
 import modelo.Pessoa;
+import modelo.Status;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -25,16 +26,24 @@ public class Cliente {
             ObjectInputStream objectInputStram = new ObjectInputStream(socket.getInputStream());
 
             System.out.println("Enviando mensagem...");
-            Pessoa pessoa = new Pessoa("Aristeu","GERAL");
-            Mensagem mensagem = new Mensagem(pessoa, "Salve!", new Date());
+            Mensagem mensagem = new Mensagem("DIV");
+            mensagem.setStatus(Status.SOLICITACAO);
+            mensagem.setParam("op1", 10);
+            mensagem.setParam("op2", 0);
             //envia mensagem ao cliente.
             objectOutputStream.writeObject(mensagem);
             // libera o buffer de mensagens para que não haja concorrência.
             objectOutputStream.flush();
 
-            System.out.println("Mensagem enviada: " + mensagem.toString());
+            System.out.println("Mensagem enviada: " + mensagem);
             mensagem = (Mensagem) objectInputStram.readObject();
-            System.out.println("Resposta: " + mensagem.toString());
+            System.out.println("Resposta: " + mensagem);
+            if(mensagem.getStatus() == Status.OK){
+                float resposta = (float) mensagem.getParam("res");
+                System.out.println("Mensagem: " + resposta);
+            } else {
+                System.out.println("Erro: " + mensagem.getStatus());
+            }
 
             objectInputStram.close();
             objectOutputStream.close();

@@ -1,48 +1,53 @@
 package modelo;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Mensagem implements Serializable {
-    private Pessoa pessoa;
-    private String conteudo;
-    private Date datahora;
+   private String operacao;
+   private Status status;
+   Map<String, Object> params;
 
+   public Mensagem(String operacao){
+       this.operacao = operacao;
+       params = new HashMap<>();
+   }
 
-    public Mensagem(){}
-
-    public Mensagem(Pessoa pessoa, String conteudo, Date datahora){
-        this.pessoa = pessoa;
-        this.conteudo = conteudo;
-        this.datahora = datahora;
+    public String getOperacao() {
+        return operacao;
     }
 
-    public Pessoa getPessoa() {
-        return pessoa;
+    public void setOperacao(String operacao) {
+        this.operacao = operacao;
     }
 
-    public void setPessoa(Pessoa pessoa) {
-        this.pessoa = pessoa;
+    public Status getStatus() {
+        return status;
     }
 
-    public String getConteudo() {
-        return conteudo;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
-    public void setConteudo(String conteudo) {
-        this.conteudo = conteudo;
+    public Object getParam(String chave) {
+        return params.get(chave);
     }
 
-    public Date getDatahora() {
-        return datahora;
-    }
-
-    public void setDatahora(Date datahora) {
-        this.datahora = datahora;
+    public void setParam(String chave, Object valor) {
+        params.put(chave, valor);
     }
 
     @Override
-    public String toString() {
-        return datahora + " | " + pessoa.getNome() + "@" + pessoa.getNivel() + " diz: " + conteudo;
+    public String toString(){
+       String m = "Operação: " + operacao;
+             m += "\nStatus: " + status;
+             m += "\nParametros:";
+
+       for(String chave : params.keySet()){
+           m += "\n\t" + chave + ":" + " " + params.get(chave);
+       }
+
+       return m;
     }
 }
