@@ -1,7 +1,6 @@
 package servidor;
 
 import modelo.Mensagem;
-import modelo.Pessoa;
 import modelo.Status;
 
 import java.io.IOException;
@@ -9,12 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 
 public class Servidor {
 
     // instanciando o objeto ServerSocket.
     private ServerSocket serverSocket;
+    private Mensagem resposta;
+    private Mensagem mensagem;
 
     // método que cria o server recebendo uma porta como parâmetro.
     public void criaServer(int porta) throws IOException {
@@ -29,55 +29,48 @@ public class Servidor {
 
     private void trataConexao(Socket socket) throws IOException {
 
-        Mensagem resposta = null;
-
         try {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
             System.out.println("Tratando...");
-            Mensagem mensagem = (Mensagem) objectInputStream.readObject();
 
-            String operacao = mensagem.getOperacao();
+            while (status != Status.SAIR) {
+                mensagem = (Mensagem) objectInputStream.readObject();
+                System.out.println("Mensagem do cliente: \n\t" + mensagem);
 
 
-            if (operacao.equals("HELLO")) {
-                String nome = (String) mensagem.getParam("nome");
-                String sobrenome = (String) mensagem.getParam("sobrenome");
+                String operacao = mensagem.getOperacao();
 
-                resposta = new Mensagem("HELLOREPLY");
+                Float op1 = (Float) mensagem.getParam("op1");
+                Float op2 = (Float) mensagem.getParam("op2");
 
-                if (nome == null || sobrenome == null) {
-                    resposta.setStatus(Status.PARAMERROR);
-                } else {
-                    resposta.setStatus(Status.OK);
-                    resposta.setParam("mensagem", "Hello World" + " " + nome + " " + sobrenome);
-                }
+                resposta = new Mensagem(operacao + "REPLY");
+
+                        switch (operacao) {
+                            case "DIV":
+                                divisao(op1, op2);
+                                break;
+                            case "SUB":
+                                subtracao(op1, op2);
+                                break;
+                            case "MULT":
+                                multiplicacao(op1, op2);
+                                break;
+                            case "SOMA":
+                                soma(op1, op2);
+                                break;
+                            default:
+                                defaultMessage();
+                                break;
+                        }
+
+
+                System.out.println("\nEnviando resposta...");
+                objectOutputStream.writeObject(resposta);
+                objectOutputStream.flush();
             }
 
-            if (operacao.equals("DIV")) {
-
-                try {
-                    Integer op1 = (Integer) mensagem.getParam("op1");
-                    Integer op2 = (Integer) mensagem.getParam("op2");
-
-                    resposta = new Mensagem("DIVREPLY");
-
-                    if (op2 == 0) {
-                        resposta.setStatus(Status.DIVZERO);
-                    } else {
-                        resposta.setStatus(Status.OK);
-                        float div = op1/op2;
-                        resposta.setParam("res", div);
-                    }
-
-                } catch (Exception e) {
-                    resposta.setStatus(Status.PARAMERROR);
-                }
-            }
-
-            objectOutputStream.writeObject(resposta);
-            objectOutputStream.flush();
 
             objectInputStream.close();
             objectOutputStream.close();
@@ -91,6 +84,61 @@ public class Servidor {
             fechaServer(socket);
         }
 
+    }
+
+    public void divisao(Float op1, Float op2) {
+        try {
+            if (op2 == 0) {
+                resposta.setStatus(Status.DIVZERO);
+            } else {
+                resposta.setStatus(Status.OK);
+                Float divisao = op1 / op2;
+                resposta.setParam("resposta", divisao);
+            }
+
+        } catch (Exception e) {
+            resposta.setStatus(Status.PARAMERROR);
+        }
+    }
+
+    public void subtracao(Float op1, Float op2) {
+        try {
+
+            resposta.setStatus(Status.OK);
+            Float subtracao = op1 - op2;
+            resposta.setParam("resposta", subtracao);
+
+        } catch (Exception e) {
+            resposta.setStatus(Status.PARAMERROR);
+        }
+    }
+
+    public void multiplicacao(Float op1, Float op2) {
+        try {
+            resposta.setStatus(Status.OK);
+            Float multiplicacao = op1 * op2;
+            resposta.setParam("resposta", multiplicacao);
+
+        } catch (Exception e) {
+            resposta.setStatus(Status.PARAMERROR);
+        }
+    }
+
+    public void soma(Float op1, Float op2) {
+        try {
+
+            resposta.setStatus(Status.OK);
+            Float subtracao = op1 + op2;
+            resposta.setParam("resposta", subtracao);
+
+        } catch (Exception e) {
+            resposta.setStatus(Status.PARAMERROR);
+        }
+    }
+
+    public void defaultMessage() {
+        resposta.setStatus(Status.ERROR);
+        resposta.setParam("mensagem", "Mensagem não autorizada ou inválida!");
     }
 
     private void fechaServer(Socket socket) throws IOException {

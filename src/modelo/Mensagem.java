@@ -5,14 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Mensagem implements Serializable {
-   private String operacao;
-   private Status status;
-   Map<String, Object> params;
+    private String operacao;
+    private Status status;
+    private Map<String, Object> params;
 
-   public Mensagem(String operacao){
-       this.operacao = operacao;
-       params = new HashMap<>();
-   }
+    public Mensagem(){
+        params = new HashMap<>();
+    }
+
+    public Mensagem(String operacao) {
+        this.operacao = operacao;
+        params = new HashMap<>();
+    }
 
     public String getOperacao() {
         return operacao;
@@ -39,15 +43,19 @@ public class Mensagem implements Serializable {
     }
 
     @Override
-    public String toString(){
-       String m = "Operação: " + operacao;
-             m += "\nStatus: " + status;
-             m += "\nParametros:";
+    public String toString() {
+        String m = "\n\tOperação: " + operacao;
+        m += "\n\tStatus: " + status;
+        m += "\n\tParametros:";
 
-       for(String chave : params.keySet()){
-           m += "\n\t" + chave + ":" + " " + params.get(chave);
-       }
+        if (params.keySet().isEmpty()) {
+            m += " nenhum";
+        } else {
+            for (String chave : params.keySet()) {
+                m += "\n\t\t" + chave + ":" + " " + params.get(chave);
+            }
+        }
 
-       return m;
+        return m;
     }
 }
