@@ -37,10 +37,10 @@ public class Cliente {
                     break;
                 }
 
-                System.out.print("Digite o primeito operador: ");
+                System.out.print("Digite o primeiro número: ");
                 float operador1 = leitorOperador1.nextFloat();
 
-                System.out.print("Digite o segundo operador: ");
+                System.out.print("Digite o segundo número ");
                 float operador2 = leitorOperador2.nextFloat();
 
                 Mensagem mensagem = new Mensagem();

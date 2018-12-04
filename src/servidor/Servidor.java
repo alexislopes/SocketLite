@@ -91,6 +91,7 @@ public class Servidor {
         try {
             if (op2 == 0) {
                 resposta.setStatus(Status.DIVZERO);
+                resposta.setParam("mensagem", "Não é possível dividir por 0!");
             } else {
                 resposta.setStatus(Status.OK);
                 Float divisao = op1 / op2;
