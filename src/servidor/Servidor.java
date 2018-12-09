@@ -1,30 +1,31 @@
 package servidor;
 
-import modelo.Mensagem;
-import modelo.Status;
+//import modelo.Mensagem;
+//import modelo.Status;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Servidor {
 
     // instanciando o objeto ServerSocket.
     private ServerSocket serverSocket;
-    private Mensagem resposta;
-    private Mensagem mensagem;
-    private Status status;
+    private String resposta;
+    private ArrayList<Object> mensagem;
+
 
     // método que cria o server recebendo uma porta como parâmetro.
-    public void criaServer(int porta) throws IOException {
+    private void criaServer(int porta) throws IOException {
         // inicializando a variável de criação do socket.
         serverSocket = new ServerSocket(porta);
     }
 
     // método que adquire conexão, retorna um socket.
-    public Socket esperaConexao() throws IOException {
+    private  Socket esperaConexao() throws IOException {
         return serverSocket.accept();
     }
 
@@ -36,36 +37,37 @@ public class Servidor {
 
             System.out.println("Tratando...");
 
-            while (status != Status.SAIR) {
-                mensagem = (Mensagem) objectInputStream.readObject();
+            while (true) {
+                mensagem = (ArrayList<Object>) objectInputStream.readObject();
                 System.out.println("Mensagem do cliente: \n\t" + mensagem);
 
 
-                String operacao = mensagem.getOperacao();
+                String operacao = (String) mensagem.get(0);
 
-                Float op1 = (Float) mensagem.getParam("op1");
-                Float op2 = (Float) mensagem.getParam("op2");
+                if(operacao.equalsIgnoreCase("sair")) {
+                    break;
+                }
 
-                resposta = new Mensagem(operacao + "REPLY");
+                Float op1 = (Float) mensagem.get(1);
+                Float op2 = (Float) mensagem.get(2);
 
-                        switch (operacao) {
-                            case "DIV":
-                                divisao(op1, op2);
-                                break;
-                            case "SUB":
-                                subtracao(op1, op2);
-                                break;
-                            case "MULT":
-                                multiplicacao(op1, op2);
-                                break;
-                            case "SOMA":
-                                soma(op1, op2);
-                                break;
-                            default:
-                                defaultMessage();
-                                break;
-                        }
-
+                switch (operacao) {
+                    case "DIV":
+                        divisao(op1, op2);
+                        break;
+                    case "SUB":
+                        subtracao(op1, op2);
+                        break;
+                    case "MULT":
+                        multiplicacao(op1, op2);
+                        break;
+                    case "SOMA":
+                        soma(op1, op2);
+                        break;
+                    default:
+                        defaultMessage();
+                        break;
+                }
 
                 System.out.println("\nEnviando resposta...");
                 objectOutputStream.writeObject(resposta);
@@ -87,60 +89,54 @@ public class Servidor {
 
     }
 
-    public void divisao(Float op1, Float op2) {
+    private void divisao(Float op1, Float op2) {
         try {
             if (op2 == 0) {
-                resposta.setStatus(Status.DIVZERO);
-                resposta.setParam("mensagem", "Não é possível dividir por 0!");
+
+                resposta = "Não é possível dividir por 0!";
             } else {
-                resposta.setStatus(Status.OK);
+
                 Float divisao = op1 / op2;
-                resposta.setParam("resposta", divisao);
+                resposta = Float.toString(divisao);
             }
 
         } catch (Exception e) {
-            resposta.setStatus(Status.PARAMERROR);
+            resposta = "Erro nos parametros!";
         }
     }
 
-    public void subtracao(Float op1, Float op2) {
+    private void subtracao(Float op1, Float op2) {
         try {
-
-            resposta.setStatus(Status.OK);
             Float subtracao = op1 - op2;
-            resposta.setParam("resposta", subtracao);
+            resposta = Float.toString(subtracao);
 
         } catch (Exception e) {
-            resposta.setStatus(Status.PARAMERROR);
+            resposta = "Erro nos parametros!";
         }
     }
 
-    public void multiplicacao(Float op1, Float op2) {
+    private void multiplicacao(Float op1, Float op2) {
         try {
-            resposta.setStatus(Status.OK);
             Float multiplicacao = op1 * op2;
-            resposta.setParam("resposta", multiplicacao);
+            resposta = Float.toString(multiplicacao);
 
         } catch (Exception e) {
-            resposta.setStatus(Status.PARAMERROR);
+            resposta = "Erro nos parametros!";
         }
     }
 
-    public void soma(Float op1, Float op2) {
+    private void soma(Float op1, Float op2) {
         try {
-
-            resposta.setStatus(Status.OK);
-            Float subtracao = op1 + op2;
-            resposta.setParam("resposta", subtracao);
+            Float soma = op1 + op2;
+            resposta = Float.toString(soma);
 
         } catch (Exception e) {
-            resposta.setStatus(Status.PARAMERROR);
+            resposta = "Erro nos parametros!";
         }
     }
 
-    public void defaultMessage() {
-        resposta.setStatus(Status.ERROR);
-        resposta.setParam("mensagem", "Mensagem não autorizada ou inválida!");
+   private void defaultMessage() {
+        resposta = "Operação fora do padrão";
     }
 
     private void fechaServer(Socket socket) throws IOException {

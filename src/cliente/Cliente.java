@@ -1,12 +1,13 @@
 package cliente;
 
-import modelo.Mensagem;
-import modelo.Status;
+//import modelo.Mensagem;
+//import modelo.Status;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,10 +20,17 @@ public class Cliente {
         Scanner leitorOperador1 = new Scanner(System.in);
         Scanner leitorOperador2 = new Scanner(System.in);
 
+        Scanner leitorip = new Scanner(System.in);
+
+
+
+        System.out.println("digite o ip do server: ");
+        String ip = leitorip.nextLine();
+
 
         try {
             System.out.println("Estabelecendo conexão...");
-            Socket socket = new Socket("localhost", 5050);
+            Socket socket = new Socket(ip, 5050);
             System.out.println("\tConexão estabelecida!");
 
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -38,32 +46,32 @@ public class Cliente {
                 }
 
                 System.out.print("Digite o primeiro número: ");
-                float operador1 = leitorOperador1.nextFloat();
+                Float operador1 = leitorOperador1.nextFloat();
 
                 System.out.print("Digite o segundo número ");
-                float operador2 = leitorOperador2.nextFloat();
+                Float operador2 = leitorOperador2.nextFloat();
 
-                Mensagem mensagem = new Mensagem();
+                ArrayList<Object> mensagem = new ArrayList<>();
 
                 switch (escolha) {
                     case 1:
-                        mensagem.setOperacao("SOMA");
+                        mensagem.add("SOMA");
                         break;
                     case 2:
-                        mensagem.setOperacao("SUB");
+                        mensagem.add("SUB");
                         break;
                     case 3:
-                        mensagem.setOperacao("DIV");
+                        mensagem.add("DIV");
                         break;
                     case 4:
-                        mensagem.setOperacao("MULT");
+                        mensagem.add("MULT");
                         break;
                 }
 
 
-                mensagem.setStatus(Status.SOLICITACAO);
-                mensagem.setParam("op1", operador1);
-                mensagem.setParam("op2", operador2);
+
+                mensagem.add(operador1);
+                mensagem.add(operador2);
 
                 System.out.println("Enviando mensagem...");
 
@@ -73,13 +81,8 @@ public class Cliente {
                 objectOutputStream.flush();
 
                 System.out.println("\nMensagem enviada: " + mensagem);
-                mensagem = (Mensagem) objectInputStram.readObject();
-                System.out.println("\nResposta: " + mensagem);
-                if (mensagem.getStatus() == Status.OK) {
-                    float resposta = (float) mensagem.getParam("resposta");
-                } else {
-                    System.out.println("Erro: " + mensagem.getStatus());
-                }
+                String respmensagem = (String) objectInputStram.readObject();
+                System.out.println("\nResposta: " + respmensagem);
             }
 
 
